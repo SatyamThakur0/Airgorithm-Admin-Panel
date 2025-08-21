@@ -22,7 +22,6 @@ const menuItems = [
     { href: "/airplane", label: "Airplanes", icon: Plane },
     { href: "/flight-cycle", label: "Flight Cycles", icon: Route },
     { href: "/flight", label: "Flights", icon: Calendar },
-    // { href: "/logout", label: "Logout", icon: LogOut },
 ];
 
 export function Sidebar({
