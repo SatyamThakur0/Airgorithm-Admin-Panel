@@ -1,0 +1,23 @@
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { AirportForm } from "../forms/AirportForm";
+
+export default function AirportsPage() {
+    const [formData, setFormData] = useState({});
+
+    return (
+        <Card className="w-full h-screen">
+            <CardHeader className="pb-4">
+                <CardTitle className="text-xl md:text-2xl font-bold">
+                    Create Airport
+                </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0 md:p-6">
+                <AirportForm
+                    formData={formData}
+                    onFormDataChange={setFormData}
+                />
+            </CardContent>
+        </Card>
+    );
+}
