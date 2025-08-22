@@ -4,9 +4,12 @@ import { Label } from "../ui/label";
 import { AutocompleteInput } from "../Admin/AutoCompleteInput";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 export function AirportForm({ formData, onFormDataChange }) {
     const [cities, setCities] = useState([]);
+    const [isCreating, setIsCreating] = useState(false);
+
     const handleCityChange = async (name) => {
         try {
             let res = await fetch(
@@ -25,6 +28,7 @@ export function AirportForm({ formData, onFormDataChange }) {
             toast(error.message);
         }
     };
+
     const handleInputChange = (fieldName, value, selectedId) => {
         let finalValue = value;
 
@@ -44,6 +48,7 @@ export function AirportForm({ formData, onFormDataChange }) {
             code: formData.code,
             city_id: formData.city_name.id,
         };
+        setIsCreating(true);
         try {
             let res = await fetch(
                 `${import.meta.env.VITE_BACKEND_URL}/flight/airport`,
@@ -62,8 +67,11 @@ export function AirportForm({ formData, onFormDataChange }) {
             toast(`New airport "${res.data.name}" created.`);
             setCities([]);
             onFormDataChange({});
+            setIsCreating(false);
         } catch (error) {
             toast(error.message);
+        } finally {
+            setIsCreating(false);
         }
     };
 
@@ -134,9 +142,19 @@ export function AirportForm({ formData, onFormDataChange }) {
                     </div>
                 </div>
 
-                <Button type="submit" className="w-full">
-                    Create Airport
-                </Button>
+                {isCreating ? (
+                    <Button
+                        type="submit"
+                        className="w-full flex justify-center items-center"
+                    >
+                        <Loader2 className="animate-spin" />{" "}
+                        <span>Creating Airport</span>
+                    </Button>
+                ) : (
+                    <Button type="submit" className="w-full">
+                        Create Airport
+                    </Button>
+                )}
             </form>
         </div>
     );

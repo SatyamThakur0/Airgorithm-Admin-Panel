@@ -3,7 +3,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function FlightCycle() {
@@ -13,7 +13,7 @@ export default function FlightCycle() {
         start_date: "",
         legs: [],
     });
-
+    const [isCreating, setIsCreating] = useState(false);
     const [airports, setAirports] = useState([]);
     const [airplanes, setAirplanes] = useState([]);
     const [airportSearchTerms, setAirportSearchTerms] = useState({});
@@ -21,89 +21,6 @@ export default function FlightCycle() {
     const [showAirportSuggestions, setShowAirportSuggestions] = useState({});
     const [showAirplaneSuggestions, setShowAirplaneSuggestions] =
         useState(false);
-
-    const fetchAirports = async (searchTerm) => {
-        await new Promise((resolve) => setTimeout(resolve, 300));
-
-        const mockAirports = [
-            {
-                id: "22fd6d3f-cdf1-42f0-9049-9b212cd7f4f6",
-                name: "John F. Kennedy International Airport",
-                code: "JFK",
-                city: "New York",
-            },
-            {
-                id: "79461ea1-6b8f-46e3-9a8d-48c7870ca391",
-                name: "Los Angeles International Airport",
-                code: "LAX",
-                city: "Los Angeles",
-            },
-            {
-                id: "5a529a7e-d1be-498e-82bf-a4e1a2deb225",
-                name: "London Heathrow Airport",
-                code: "LHR",
-                city: "London",
-            },
-            {
-                id: "b8c9d0e1-f2a3-4b5c-6d7e-8f9a0b1c2d3e",
-                name: "Tokyo Haneda Airport",
-                code: "HND",
-                city: "Tokyo",
-            },
-            {
-                id: "c9d0e1f2-a3b4-5c6d-7e8f-9a0b1c2d3e4f",
-                name: "Dubai International Airport",
-                code: "DXB",
-                city: "Dubai",
-            },
-        ];
-
-        return mockAirports.filter(
-            (airport) =>
-                airport.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                airport.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                airport.city.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    };
-
-    const fetchAirplanes = async (searchTerm) => {
-        await new Promise((resolve) => setTimeout(resolve, 300));
-
-        const mockAirplanes = [
-            {
-                id: "ea29406c-2697-4c07-bb98-498b3a7e2ffe",
-                name: "Boeing 737-800",
-                model: "737-800",
-                capacity: 189,
-            },
-            {
-                id: "fb3a517d-3798-5d18-cc09-5a9c3b8f3aff",
-                name: "Airbus A320",
-                model: "A320",
-                capacity: 180,
-            },
-            {
-                id: "gc4b628e-4899-6e29-dd1a-6bad4c9g4bgg",
-                name: "Boeing 777-300ER",
-                model: "777-300ER",
-                capacity: 396,
-            },
-            {
-                id: "hd5c739f-599a-7f3a-ee2b-7cbe5dah5chh",
-                name: "Airbus A350-900",
-                model: "A350-900",
-                capacity: 325,
-            },
-        ];
-
-        return mockAirplanes.filter(
-            (airplane) =>
-                airplane.name
-                    .toLowerCase()
-                    .includes(searchTerm.toLowerCase()) ||
-                airplane.model.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    };
 
     useEffect(() => {
         if (formData.legs.length > 0) {
@@ -116,31 +33,6 @@ export default function FlightCycle() {
             setFormData((prev) => ({ ...prev, total_days: "0" }));
         }
     }, [formData.legs]);
-
-    // useEffect(() => {
-    //     if (airplaneSearchTerm) {
-    //         fetchAirplanes(airplaneSearchTerm).then(setAirplanes);
-    //     }
-    // }, [airplaneSearchTerm]);
-
-    // useEffect(() => {
-    //     const searchTerms = Object.values(airportSearchTerms).filter(
-    //         (term) => term.length > 0
-    //     );
-    //     if (searchTerms.length > 0) {
-    //         const uniqueTerms = [...new Set(searchTerms)];
-    //         Promise.all(uniqueTerms.map((term) => fetchAirports(term))).then(
-    //             (results) => {
-    //                 const allAirports = results.flat();
-    //                 const uniqueAirports = allAirports.filter(
-    //                     (airport, index, self) =>
-    //                         index === self.findIndex((a) => a.id === airport.id)
-    //                 );
-    //                 setAirports(uniqueAirports);
-    //             }
-    //         );
-    //     }
-    // }, [airportSearchTerms]);
 
     const addLeg = () => {
         const newLeg = {
@@ -195,7 +87,7 @@ export default function FlightCycle() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // console.log("Flight Cycle Data:", formData);
+        setIsCreating(true);
         try {
             let res = await fetch(
                 `${import.meta.env.VITE_BACKEND_URL}/flight/flight/cycle`,
@@ -220,8 +112,11 @@ export default function FlightCycle() {
                 start_date: "",
                 legs: [],
             });
+            setIsCreating(false);
         } catch (error) {
             toast(error.message);
+        } finally {
+            setIsCreating(false);
         }
     };
 
@@ -751,13 +646,19 @@ export default function FlightCycle() {
                     </div>
 
                     <div className="flex justify-center sm:justify-end">
-                        <Button
-                            type="submit"
-                            size="lg"
-                            className="w-full sm:w-auto"
-                        >
-                            Generate Flight Cycle Data
-                        </Button>
+                        {isCreating ? (
+                            <Button
+                                type="submit"
+                                className="w-full flex justify-center items-center"
+                            >
+                                <Loader2 className="animate-spin" />{" "}
+                                <span>Generating Flight Cycle</span>
+                            </Button>
+                        ) : (
+                            <Button type="submit" className="w-full">
+                                Generate Flight Cycle
+                            </Button>
+                        )}
                     </div>
                 </form>
             </div>

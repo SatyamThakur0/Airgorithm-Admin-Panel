@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plane, MapPin, Clock, DollarSign } from "lucide-react";
+import { Plane, MapPin, Clock, DollarSign, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function FlightCreationForm() {
@@ -21,6 +21,7 @@ export default function FlightCreationForm() {
             business: 3.5,
         },
     });
+    const [isCreating, setIsCreating] = useState(false);
 
     const [airplanes, setAirplanes] = useState([]);
     const [sourceAirports, setSourceAirports] = useState([]);
@@ -39,7 +40,6 @@ export default function FlightCreationForm() {
     const sourceRef = useRef(null);
     const destinationRef = useRef(null);
 
-    // Mock API functions - replace with actual API calls
     const fetchAirplanes = async (query) => {
         let result;
         try {
@@ -80,7 +80,6 @@ export default function FlightCreationForm() {
         return result;
     };
 
-    // Handle airplane search
     useEffect(() => {
         if (airplaneQuery.length > 0) {
             const searchAirplanes = async () => {
@@ -93,7 +92,6 @@ export default function FlightCreationForm() {
         }
     }, [airplaneQuery]);
 
-    // Handle source airport search
     useEffect(() => {
         if (sourceQuery.length > 0) {
             const searchAirports = async () => {
@@ -106,7 +104,6 @@ export default function FlightCreationForm() {
         }
     }, [sourceQuery]);
 
-    // Handle destination airport search
     useEffect(() => {
         if (destinationQuery.length > 0) {
             const searchAirports = async () => {
@@ -119,7 +116,6 @@ export default function FlightCreationForm() {
         }
     }, [destinationQuery]);
 
-    // Handle clicks outside dropdowns
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (
@@ -176,6 +172,7 @@ export default function FlightCreationForm() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsCreating(true);
 
         const submissionData = {
             ...formData,
@@ -216,8 +213,11 @@ export default function FlightCreationForm() {
             setSourceQuery("");
             setDestinationQuery("");
             setAirplaneQuery("");
+            setIsCreating(false);
         } catch (error) {
             toast.error(error.message);
+        } finally {
+            setIsCreating(false);
         }
     };
 
@@ -612,9 +612,19 @@ export default function FlightCreationForm() {
                             </div>
 
                             {/* Submit Button */}
-                            <Button type="submit" className="w-full">
-                                Create Flight
-                            </Button>
+                            {isCreating ? (
+                                <Button
+                                    type="submit"
+                                    className="w-full flex justify-center items-center"
+                                >
+                                    <Loader2 className="animate-spin" />{" "}
+                                    <span>Creating Flight</span>
+                                </Button>
+                            ) : (
+                                <Button type="submit" className="w-full">
+                                    Create Flight
+                                </Button>
+                            )}
                         </form>
                     </CardContent>
                 </Card>

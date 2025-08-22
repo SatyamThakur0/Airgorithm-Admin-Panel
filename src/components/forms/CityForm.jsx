@@ -4,9 +4,12 @@ import { Label } from "../ui/label";
 import { AutocompleteInput } from "../Admin/AutoCompleteInput";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 export function CityForm({ formData, onFormDataChange }) {
     const [countries, setCountries] = useState([]);
+    const [isCreating, setIsCreating] = useState(false);
+    
     const handleInputChange = (fieldName, value, selectedId) => {
         let finalValue = value;
         if (selectedId && fieldName === "country_name") {
@@ -44,6 +47,7 @@ export function CityForm({ formData, onFormDataChange }) {
             name: formData.name,
             country_id: formData.country_name.id,
         };
+        setIsCreating(true);
         try {
             let res = await fetch(
                 `${import.meta.env.VITE_BACKEND_URL}/flight/city`,
@@ -60,8 +64,11 @@ export function CityForm({ formData, onFormDataChange }) {
             if (!res.ok) return toast(res.message);
             toast(`New city "${res.data.name}" created.`);
             onFormDataChange({});
+            setIsCreating(false);
         } catch (error) {
             toast(error.message);
+        } finally {
+            setIsCreating(false);
         }
     };
 
@@ -115,22 +122,19 @@ export function CityForm({ formData, onFormDataChange }) {
                     </div>
                 </div>
 
-                {/* {Object.keys(formData).length > 0 && (
-                    <Card className="mt-6">
-                        <CardContent className="pt-6">
-                            <h3 className="text-sm font-medium mb-2">
-                                Current Form Data:
-                            </h3>
-                            <pre className="text-xs bg-muted p-3 rounded overflow-auto max-h-60">
-                                {JSON.stringify(formData, null, 2)}
-                            </pre>
-                        </CardContent>
-                    </Card>
-                )} */}
-
-                <Button type="submit" className="w-full">
-                    Create City
-                </Button>
+                {isCreating ? (
+                    <Button
+                        type="submit"
+                        className="w-full flex justify-center items-center"
+                    >
+                        <Loader2 className="animate-spin" />{" "}
+                        <span>Creating City</span>
+                    </Button>
+                ) : (
+                    <Button type="submit" className="w-full">
+                        Create City
+                    </Button>
+                )}
             </form>
         </div>
     );

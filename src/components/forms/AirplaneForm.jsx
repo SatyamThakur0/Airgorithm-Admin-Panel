@@ -1,10 +1,12 @@
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { Card, CardContent } from "../ui/card";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
 
 export function AirplaneForm({ formData, onFormDataChange }) {
+    const [isCreating, setIsCreating] = useState(false);
     const handleInputChange = (fieldName, value) => {
         const newData = { ...formData, [fieldName]: value };
         onFormDataChange(newData);
@@ -27,23 +29,31 @@ export function AirplaneForm({ formData, onFormDataChange }) {
             code: formData.code,
             seat_distribution: formData.seat_distribution || {},
         };
+        setIsCreating(true);
 
         console.log("Creating airplane:", formattedData);
-        let res = await fetch(
-            `${import.meta.env.VITE_BACKEND_URL}/flight/airplane`,
-            {
-                method: "POST",
-                credentials: "include",
-                headers: {
-                    "content-type": "application/json",
-                },
-                body: JSON.stringify(formattedData),
-            }
-        );
-        res = await res.json();
-        if (!res.ok) return toast(res.message);
-        toast(`Airplane ${res.data.name} created.`);
-        onFormDataChange({});
+        try {
+            let res = await fetch(
+                `${import.meta.env.VITE_BACKEND_URL}/flight/airplane`,
+                {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "content-type": "application/json",
+                    },
+                    body: JSON.stringify(formattedData),
+                }
+            );
+            res = await res.json();
+            if (!res.ok) return toast(res.message);
+            toast(`Airplane ${res.data.name} created.`);
+            onFormDataChange({});
+            setIsCreating(false);
+        } catch (error) {
+            toast.error(error.message);
+        } finally {
+            setIsCreating(false);
+        }
     };
 
     return (
@@ -171,9 +181,19 @@ export function AirplaneForm({ formData, onFormDataChange }) {
                     </div>
                 </div>
 
-                <Button type="submit" className="w-full">
-                    Create Airplane
-                </Button>
+                {isCreating ? (
+                    <Button
+                        type="submit"
+                        className="w-full flex justify-center items-center"
+                    >
+                        <Loader2 className="animate-spin" />{" "}
+                        <span>Creating Airport</span>
+                    </Button>
+                ) : (
+                    <Button type="submit" className="w-full">
+                        Create Airport
+                    </Button>
+                )}
             </form>
         </div>
     );

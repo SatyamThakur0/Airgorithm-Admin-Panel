@@ -3,16 +3,20 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Card, CardContent } from "../ui/card";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
 
 export function CountryForm({ formData, onFormDataChange }) {
     const handleInputChange = (fieldName, value) => {
         const newData = { ...formData, [fieldName]: value };
         onFormDataChange(newData);
     };
+    const [isCreating, setIsCreating] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log("Creating country:", formData);
+        setIsCreating(true);
         try {
             let res = await fetch(
                 `${import.meta.env.VITE_BACKEND_URL}/flight/country`,
@@ -29,8 +33,11 @@ export function CountryForm({ formData, onFormDataChange }) {
             if (!res.ok) toast(res.message);
             toast(`New country ${res.data.name} created.`);
             onFormDataChange({});
+            setIsCreating(false);
         } catch (error) {
             toast(error.message);
+        } finally {
+            setIsCreating(false);
         }
     };
 
@@ -73,22 +80,19 @@ export function CountryForm({ formData, onFormDataChange }) {
                     </div>
                 </div>
 
-                {Object.keys(formData).length > 0 && (
-                    <Card className="mt-6">
-                        <CardContent className="pt-6">
-                            <h3 className="text-sm font-medium mb-2">
-                                Current Form Data:
-                            </h3>
-                            <pre className="text-xs bg-muted p-3 rounded overflow-auto max-h-60">
-                                {JSON.stringify(formData, null, 2)}
-                            </pre>
-                        </CardContent>
-                    </Card>
+                {isCreating ? (
+                    <Button
+                        type="submit"
+                        className="w-full flex justify-center items-center"
+                    >
+                        <Loader2 className="animate-spin" />{" "}
+                        <span>Creating Country</span>
+                    </Button>
+                ) : (
+                    <Button type="submit" className="w-full">
+                        Create Country
+                    </Button>
                 )}
-
-                <Button type="submit" className="w-full">
-                    Create Country
-                </Button>
             </form>
         </div>
     );
