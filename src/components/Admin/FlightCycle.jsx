@@ -106,6 +106,10 @@ export default function FlightCycle() {
 
             if (!res.ok) return toast(res.message);
             toast(`New flight cycle created.`);
+            setAirplanes([]);
+            setAirports([]);
+            setAirplaneSearchTerm("");
+            setAirportSearchTerms({});
             setFormData({
                 airplane_id: "",
                 total_days: "0",

@@ -165,9 +165,11 @@ export default function FlightCreationForm() {
     };
 
     const formatDateTime = (dateTimeString) => {
+        console.log(dateTimeString);
+        
         if (!dateTimeString) return "";
         const date = new Date(dateTimeString);
-        return date.toISOString().slice(0, 16).replace("T", " ") + ":00";
+        return date;
     };
 
     const handleSubmit = async (e) => {
